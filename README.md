@@ -22,18 +22,21 @@ DataMiningProject/
 │   └── main/
 │       └── java/
 │           └── org/
-│               └── example/
+│               └── classpj/
 │                   ├── Main.java
-│                   ├── DataPreprocessor.java
-│                   ├── WekaClassifier.java
-│                   ├── ImprovedClassifier.java
-│                   └── ModelEvaluator.java
-├── datasets/
-│   ├── raw_data.csv
-│   ├── train.arff
-│   └── test.arff
-├── models/
-│   └── [Generated .model files]
+│                   ├── Models/
+│                      ├── WekaClassifier.java
+│                      └──ImprovedClassifier.java
+│                   ├── Processors/
+│                      ├── DataPreprocessor.java
+│                      └── ModelEvaluator.java
+│       └── resources/
+|           ├── datasets/
+│               ├── heart_disease.csv
+│               ├── airplane.arff
+│               └── credits-g.arff
+|           ├── models/
+│               └── [Generated .model files]
 ├── build.gradle
 ├── settings.gradle
 ├── gradlew
@@ -86,3 +89,8 @@ gradlew.bat build
 # Create distribution
 ./gradlew dist
 ```
+
+## Pre-processor usage
+To use the Preprocessing class, first put the data inside the resources folder, then run the load data function (examples in Main.java), after that, 
+there are 2 attribute selectors you can use to determine the best attributes, Pearson Correlation and Chi-Square-Test.
+### Note: For Pearson, all data are turned into numeric, and for Chi-Square, all data are nominal.
