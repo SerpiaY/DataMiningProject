@@ -24,10 +24,12 @@ dependencies {
     // Testing
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation("nz.ac.waikato.cms.weka:weka-dev:3.9.6")
+    implementation("nz.ac.waikato.cms.weka:chiSquaredAttributeEval:1.0.4")
 }
 
 application {
-    mainClass.set("org.example.Main")
+    mainClass.set("org.classpj.Main")
 }
 
 tasks.test {

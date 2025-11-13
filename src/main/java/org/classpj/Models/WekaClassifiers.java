@@ -1,4 +1,4 @@
-package org.example;
+package org.classpj.Models;
 
 /**
  * Step 2: Implement a classification/prediction algorithm (20 pts)
@@ -7,7 +7,5 @@ package org.example;
  * - Selects the best algorithm using 10-fold cross-validation
  * - Saves the best model
  */
-public class WekaClassifier {
-    
-    
+public class WekaClassifiers {
 }

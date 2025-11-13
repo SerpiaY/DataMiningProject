@@ -1,4 +1,4 @@
-package org.example;
+package org.classpj.Processors;
 
 /**
  * Step 4: Model Evaluation and Report (20 pts)
@@ -7,6 +7,6 @@ package org.example;
  * - Provides remarks on experimental results
  * - Considers run-time of building models and making predictions
  */
-public class ModelEvaluator {
-    
+
+public class ModelEvaluators {
 }

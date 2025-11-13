@@ -1,4 +1,4 @@
-package org.example;
+package org.classpj.Models;
 
 /**
  * Step 3: Improved Classification
@@ -7,7 +7,5 @@ package org.example;
  * - Implements ensemble methods
  * - Handles class imbalance
  */
-public class ImprovedClassifier {
-    
-    
+public class ImprovedClassifiers {
 }
