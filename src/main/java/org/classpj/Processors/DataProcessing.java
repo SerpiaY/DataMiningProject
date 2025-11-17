@@ -4,6 +4,7 @@ import org.w3c.dom.Attr;
 import weka.attributeSelection.*;
 import weka.core.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -45,6 +46,7 @@ public class DataProcessing {
             System.out.println("Summary " + data.toSummaryString());
             System.out.println("=================-----------------------================= ");
             for(int i = 0; i < data.numAttributes(); i++){
+//                ArrayList<Double> values = new ArrayList<>();
                 AttributeStats stats = data.attributeStats(i);
                 if(data.attribute(i).isNumeric()){
                     System.out.println("Min Values: " + stats.numericStats.min);
@@ -104,17 +106,14 @@ public class DataProcessing {
         ifilter.setInputFormat(data);
         ifilter.setAttributeIndices("first-last");
         data = Filter.useFilter(data, ifilter);
-        filter = new NominalToBinary();
-        filter.setInputFormat(data);
-        data = Filter.useFilter(data, filter);
 
 
         System.out.println("Outliers & Extreme Values using IQR");
         for(int i = 0; i < data.numInstances(); i++) {
-            if (data.instance(i).value(30) != 0) {
+            if (!Objects.equals(data.instance(i).stringValue(30), "no")) {
                 outlierCount++;
             }
-            if (data.instance(i).value(31) != 0) {
+            if (!Objects.equals(data.instance(i).stringValue(31), "no")) {
                 extremeCount++;
             }
         }
