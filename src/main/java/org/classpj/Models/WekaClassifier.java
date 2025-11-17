@@ -21,18 +21,19 @@ public class WekaClassifier {
 
     /**
      * Constructor - Initialize with a specific classifier
+     * 
      * @param classifierType: "J48", "NaiveBayes", "SMO", "RandomForest"
      */
     public WekaClassifier(String classifierType) {
         this.modelName = classifierType;
 
-        switch(classifierType.toUpperCase()) {
+        switch (classifierType.toUpperCase()) {
             case "J48":
                 // Decision Tree (C4.5)
                 classifier = new J48();
                 try {
-                    String[] options = new String[]{"-C", "0.25", "-M", "2"};
-                    ((J48)classifier).setOptions(options);
+                    String[] options = new String[] { "-C", "0.25", "-M", "2" };
+                    ((J48) classifier).setOptions(options);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -52,7 +53,7 @@ public class WekaClassifier {
                 // Random Forest
                 classifier = new RandomForest();
                 try {
-                    ((RandomForest)classifier).setNumIterations(100);
+                    ((RandomForest) classifier).setNumIterations(100);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -129,9 +130,7 @@ public class WekaClassifier {
 
             // Print evaluation results
             System.out.println(eval.toSummaryString("\n=== Summary ===\n", false));
-            System.out.println("=== Detailed Accuracy By Class ===");
             System.out.println(eval.toClassDetailsString());
-            System.out.println("=== Confusion Matrix ===");
             System.out.println(eval.toMatrixString());
 
             // Additional statistics

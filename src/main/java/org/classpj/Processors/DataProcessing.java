@@ -37,26 +37,26 @@ public class DataProcessing {
             saver.setInstances(data);
             saver.setFile(new File("datasets/heart_disease.arff"));
             saver.writeBatch();
-            //data set to arff, only exist in runtime
+            // data set to arff, only exist in runtime
             data.setClass(data.attribute("Heart Disease Status"));
-            System.out.println("Data Loaded from path: "+ datapath);
+            System.out.println("Data Loaded from path: " + datapath);
             System.out.println("Number of instances: " + data.numInstances());
             System.out.println("Number of attributes: " + data.numAttributes());
             System.out.println("Class attribute: " + data.classAttribute().name());
             System.out.println("Summary " + data.toSummaryString());
             System.out.println("=================-----------------------================= ");
-            for(int i = 0; i < data.numAttributes(); i++){
-//                ArrayList<Double> values = new ArrayList<>();
+            for (int i = 0; i < data.numAttributes(); i++) {
+                // ArrayList<Double> values = new ArrayList<>();
                 AttributeStats stats = data.attributeStats(i);
-                if(data.attribute(i).isNumeric()){
+                if (data.attribute(i).isNumeric()) {
                     System.out.println("Min Values: " + stats.numericStats.min);
-                    System.out.println("Min Values: " + stats.numericStats.max);
+                    System.out.println("Max Values: " + stats.numericStats.max);
                     System.out.println("Standard Deviation " + stats.numericStats.stdDev);
-                    System.out.println("Variance for "+ data.attribute(i).name() + ": " + data.variance(i));
+                    System.out.println("Variance for " + data.attribute(i).name() + ": " + data.variance(i));
                 }
-                //Not accurate for Nominal Data, read the below count instead.
-                System.out.println("Mean/Mode for "+ data.attribute(i).name() + ": " + data.meanOrMode(i));
-                System.out.println("Missing data for "+ data.attribute(i).name() + ": " + stats.missingCount);
+                // Not accurate for Nominal Data, read the below count instead.
+                System.out.println("Mean/Mode for " + data.attribute(i).name() + ": " + data.meanOrMode(i));
+                System.out.println("Missing data for " + data.attribute(i).name() + ": " + stats.missingCount);
                 System.out.println("=================-----------------------================= ");
             }
             System.out.println();
@@ -64,8 +64,8 @@ public class DataProcessing {
             System.out.println();
             System.out.println();
             System.out.println("============----------------=========== ");
-            for(int i = 0; i < data.numAttributes(); i++){
-                if(data.attribute(i).isNominal()){
+            for (int i = 0; i < data.numAttributes(); i++) {
+                if (data.attribute(i).isNominal()) {
                     int numVals = data.attribute(i).numValues();
                     double[] counts = new double[numVals];
                     for (int j = 0; j < data.numInstances(); j++) {
@@ -74,7 +74,7 @@ public class DataProcessing {
                     }
                     System.out.println("Values Count for " + data.attribute(i).name() + ": ");
                     for (int a = 0; a < counts.length; a++) {
-                        System.out.println(data.attribute(i).value(a)+":  "+ counts[a]);
+                        System.out.println(data.attribute(i).value(a) + ":  " + counts[a]);
                     }
                     System.out.println("============----------------=========== ");
                 }
@@ -83,20 +83,19 @@ public class DataProcessing {
         }
     }
 
-
     public static Instances BasicPreprocessing(Instances data) throws Exception {
         int outlierCount = 0;
         int extremeCount = 0;
         System.out.println("Start Filtering");
-        System.out.println("Total Attr before filtering: " +  data.numInstances());
+        System.out.println("Total Attr before filtering: " + data.numInstances());
 
         Filter filter = new ReplaceMissingValues();
         filter.setInputFormat(data);
         data = Filter.useFilter(data, filter);
-        for(int i = 0; i < data.numAttributes(); i++){
+        for (int i = 0; i < data.numAttributes(); i++) {
             System.out.println("==========-Count Missing Value After Processing-==========");
             AttributeStats stats = data.attributeStats(i);
-            System.out.println("Missing data for "+ data.attribute(i).name() + ": " + stats.missingCount);
+            System.out.println("Missing data for " + data.attribute(i).name() + ": " + stats.missingCount);
             System.out.println("=================-----------------------=================");
         }
         filter = new RemoveDuplicates();
@@ -107,22 +106,26 @@ public class DataProcessing {
         ifilter.setAttributeIndices("first-last");
         data = Filter.useFilter(data, ifilter);
 
-
         System.out.println("Outliers & Extreme Values using IQR");
-        for(int i = 0; i < data.numInstances(); i++) {
-            if (!Objects.equals(data.instance(i).stringValue(30), "no")) {
+        // The IQR filter adds "Outlier" and "ExtremeValue" attributes at the end
+        int outlierIndex = data.numAttributes() - 2; // Second to last attribute
+        int extremeIndex = data.numAttributes() - 1; // Last attribute
+
+        for (int i = 0; i < data.numInstances(); i++) {
+            if (!Objects.equals(data.instance(i).stringValue(outlierIndex), "no")) {
                 outlierCount++;
             }
-            if (!Objects.equals(data.instance(i).stringValue(31), "no")) {
+            if (!Objects.equals(data.instance(i).stringValue(extremeIndex), "no")) {
                 extremeCount++;
             }
         }
         System.out.println("                Outliers Count: " + outlierCount);
         System.out.println("                Extremes Count: " + extremeCount);
 
-        System.out.println("Total Attr after filtering: " +  data.numInstances());
+        System.out.println("Total Attr after filtering: " + data.numInstances());
         return data;
     }
+
     public static void PearsonCorrAttrSelector(Instances dataset) throws Exception {
         Filter filter = new NominalToBinary();
         filter.setInputFormat(dataset);
@@ -166,8 +169,8 @@ public class DataProcessing {
         filter.setPercentage(200);
         filter.setNearestNeighbors(8);
         data = Filter.useFilter(data, filter);
-        for(int i = 0; i < data.numAttributes(); i++){
-            if(data.attribute(i).isNominal()){
+        for (int i = 0; i < data.numAttributes(); i++) {
+            if (data.attribute(i).isNominal()) {
                 int numVals = data.attribute(i).numValues();
                 double[] counts = new double[numVals];
                 for (int j = 0; j < data.numInstances(); j++) {
@@ -176,7 +179,7 @@ public class DataProcessing {
                 }
                 System.out.println("Values Count for " + data.attribute(i).name() + ": ");
                 for (int a = 0; a < counts.length; a++) {
-                    System.out.println(data.attribute(i).value(a)+":  "+ counts[a]);
+                    System.out.println(data.attribute(i).value(a) + ":  " + counts[a]);
                 }
                 System.out.println("============----------------=========== ");
             }
@@ -189,8 +192,8 @@ public class DataProcessing {
         filter.setInputFormat(data);
         filter.setSeed(423);
         data = Filter.useFilter(data, filter);
-        for(int i = 0; i < data.numAttributes(); i++){
-            if(data.attribute(i).isNominal()){
+        for (int i = 0; i < data.numAttributes(); i++) {
+            if (data.attribute(i).isNominal()) {
                 int numVals = data.attribute(i).numValues();
                 double[] counts = new double[numVals];
                 for (int j = 0; j < data.numInstances(); j++) {
@@ -199,7 +202,7 @@ public class DataProcessing {
                 }
                 System.out.println("Values Count for " + data.attribute(i).name() + ": ");
                 for (int a = 0; a < counts.length; a++) {
-                    System.out.println(data.attribute(i).value(a)+":  "+ counts[a]);
+                    System.out.println(data.attribute(i).value(a) + ":  " + counts[a]);
                 }
                 System.out.println("============----------------=========== ");
             }
@@ -207,7 +210,7 @@ public class DataProcessing {
         return data;
     }
 
-    //0 IS FOR TRAIN SETS, 1 IS FOR TEST SETS
+    // 0 IS FOR TRAIN SETS, 1 IS FOR TEST SETS
     public static Instances[] TrainTestSplit(Instances data) throws Exception {
         StratifiedRemoveFolds fold = new StratifiedRemoveFolds();
         fold.setNumFolds(10);
