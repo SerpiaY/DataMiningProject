@@ -1,8 +1,10 @@
 package org.classpj.Processors;
 
+import org.w3c.dom.Attr;
 import weka.attributeSelection.*;
 import weka.core.*;
 import java.io.*;
+import java.util.Arrays;
 import java.util.Objects;
 
 import weka.core.converters.ArffSaver;
@@ -17,6 +19,7 @@ import weka.filters.supervised.attribute.NominalToBinary;
 import weka.attributeSelection.ChiSquaredAttributeEval;
 import weka.filters.supervised.instance.SMOTE;
 import weka.filters.supervised.instance.StratifiedRemoveFolds;
+import weka.core.AttributeStats;
 
 public class DataProcessing {
 
@@ -33,6 +36,7 @@ public class DataProcessing {
             saver.setInstances(data);
             saver.setFile(new File("datasets/heart_disease.arff"));
             saver.writeBatch();
+            //data set to arff, only exist in runtime
             data.setClass(data.attribute("Heart Disease Status"));
             System.out.println("Data Loaded from path: "+ datapath);
             System.out.println("Number of instances: " + data.numInstances());
@@ -41,13 +45,38 @@ public class DataProcessing {
             System.out.println("Summary " + data.toSummaryString());
             System.out.println("=================-----------------------================= ");
             for(int i = 0; i < data.numAttributes(); i++){
+                AttributeStats stats = data.attributeStats(i);
                 if(data.attribute(i).isNumeric()){
+                    System.out.println("Min Values: " + stats.numericStats.min);
+                    System.out.println("Min Values: " + stats.numericStats.max);
+                    System.out.println("Standard Deviation " + stats.numericStats.stdDev);
                     System.out.println("Variance for "+ data.attribute(i).name() + ": " + data.variance(i));
-                    System.out.println("Mean for "+ data.attribute(i).name() + ": " + data.meanOrMode(i));
-                    System.out.println("=================-----------------------================= ");
+                }
+                //Not accurate for Nominal Data, read the below count instead.
+                System.out.println("Mean/Mode for "+ data.attribute(i).name() + ": " + data.meanOrMode(i));
+                System.out.println("Missing data for "+ data.attribute(i).name() + ": " + stats.missingCount);
+                System.out.println("=================-----------------------================= ");
+            }
+            System.out.println();
+            System.out.println();
+            System.out.println();
+            System.out.println();
+            System.out.println("============----------------=========== ");
+            for(int i = 0; i < data.numAttributes(); i++){
+                if(data.attribute(i).isNominal()){
+                    int numVals = data.attribute(i).numValues();
+                    double[] counts = new double[numVals];
+                    for (int j = 0; j < data.numInstances(); j++) {
+                        int valIndex = (int) data.instance(j).value(i);
+                        counts[valIndex]++;
+                    }
+                    System.out.println("Values Count for " + data.attribute(i).name() + ": ");
+                    for (int a = 0; a < counts.length; a++) {
+                        System.out.println(data.attribute(i).value(a)+":  "+ counts[a]);
+                    }
+                    System.out.println("============----------------=========== ");
                 }
             }
-
             return data;
         }
     }
@@ -62,6 +91,12 @@ public class DataProcessing {
         Filter filter = new ReplaceMissingValues();
         filter.setInputFormat(data);
         data = Filter.useFilter(data, filter);
+        for(int i = 0; i < data.numAttributes(); i++){
+            System.out.println("==========-Count Missing Value After Processing-==========");
+            AttributeStats stats = data.attributeStats(i);
+            System.out.println("Missing data for "+ data.attribute(i).name() + ": " + stats.missingCount);
+            System.out.println("=================-----------------------=================");
+        }
         filter = new RemoveDuplicates();
         filter.setInputFormat(data);
         data = Filter.useFilter(data, filter);
@@ -125,12 +160,28 @@ public class DataProcessing {
             System.out.println(idx + ": " + dataset.attribute(idx).name());
         }
     }
+
     public static Instances OversamplingData(Instances data) throws Exception {
         SMOTE filter = new SMOTE();
         filter.setInputFormat(data);
         filter.setPercentage(200);
         filter.setNearestNeighbors(8);
         data = Filter.useFilter(data, filter);
+        for(int i = 0; i < data.numAttributes(); i++){
+            if(data.attribute(i).isNominal()){
+                int numVals = data.attribute(i).numValues();
+                double[] counts = new double[numVals];
+                for (int j = 0; j < data.numInstances(); j++) {
+                    int valIndex = (int) data.instance(j).value(i);
+                    counts[valIndex]++;
+                }
+                System.out.println("Values Count for " + data.attribute(i).name() + ": ");
+                for (int a = 0; a < counts.length; a++) {
+                    System.out.println(data.attribute(i).value(a)+":  "+ counts[a]);
+                }
+                System.out.println("============----------------=========== ");
+            }
+        }
         return data;
     }
 
@@ -139,6 +190,21 @@ public class DataProcessing {
         filter.setInputFormat(data);
         filter.setSeed(423);
         data = Filter.useFilter(data, filter);
+        for(int i = 0; i < data.numAttributes(); i++){
+            if(data.attribute(i).isNominal()){
+                int numVals = data.attribute(i).numValues();
+                double[] counts = new double[numVals];
+                for (int j = 0; j < data.numInstances(); j++) {
+                    int valIndex = (int) data.instance(j).value(i);
+                    counts[valIndex]++;
+                }
+                System.out.println("Values Count for " + data.attribute(i).name() + ": ");
+                for (int a = 0; a < counts.length; a++) {
+                    System.out.println(data.attribute(i).value(a)+":  "+ counts[a]);
+                }
+                System.out.println("============----------------=========== ");
+            }
+        }
         return data;
     }
 

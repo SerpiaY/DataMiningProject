@@ -9,7 +9,7 @@ public class Main {
         Instances data = DataProcessing.ReadAndReturnDataLocal("datasets/heart_disease.csv");
 
         data = DataProcessing.BasicPreprocessing(data);
-        data = DataProcessing.ResamplingData(data);
+        data = DataProcessing.OversamplingData(data);
         System.out.println(data.numInstances());
 
         Instances[] TrainTestSets = new Instances[2];
