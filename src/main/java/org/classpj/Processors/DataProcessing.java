@@ -27,9 +27,21 @@ public class DataProcessing {
             saver.setInstances(data);
             saver.setFile(new File("datasets/heart_disease.arff"));
             saver.writeBatch();
+            data.setClass(data.attribute("Heart Disease Status"));
+            System.out.println("Data Loaded from path: "+ datapath);
+            System.out.println("Number of instances: " + data.numInstances());
+            System.out.println("Number of attributes: " + data.numAttributes());
+            System.out.println("Class attribute: " + data.classAttribute().name());
+            System.out.println("Summary " + data.toSummaryString());
+            for(int i = 0; i < data.numAttributes(); i++){
+                if(data.attribute(i).isNumeric()){
+                    System.out.println("Variance for "+ data.attribute(i).name() + ": " + data.variance(i));
+                }
+            }
             return data;
         }
     }
+
 
     public static Instances BasicPreprocessing(Instances dataset) throws Exception {
         Filter filter = new ReplaceMissingValues();
