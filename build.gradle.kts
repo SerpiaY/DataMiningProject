@@ -26,6 +26,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     implementation("nz.ac.waikato.cms.weka:weka-dev:3.9.6")
     implementation("nz.ac.waikato.cms.weka:chiSquaredAttributeEval:1.0.4")
+    implementation("org.jfree:jfreechart:1.5.6")
+    implementation("nz.ac.waikato.cms.weka:SMOTE:1.0.3")
 }
 
 application {
