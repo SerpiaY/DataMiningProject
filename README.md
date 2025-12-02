@@ -198,60 +198,66 @@ Bagging typically achieves:
 
 ## Step 4: Model Evaluation and Comparison Report (ModelEvaluators)
 
-The `ModelEvaluators` class provides comprehensive evaluation and comparison of all classification models, including runtime performance analysis.
+The `ModelEvaluators` class provides comprehensive comparison of all classification models using results captured during Steps 2 and 3. **No re-evaluation is performed** - Step 4 generates reports instantly from already-computed metrics.
 
 ### Features
 
-#### 1. **Individual Model Evaluation**
-
-- Evaluates each classifier using 10-fold cross-validation
-- Tracks training and evaluation time
-- Reports detailed metrics:
-  - Accuracy, Precision, Recall, F-Measure
-  - Kappa statistic, ROC Area
-  - Confusion matrix
-  - Per-class statistics
-
-#### 2. **Comparative Analysis**
+#### 1. **Model Comparison Report**
 
 - Side-by-side comparison table of all models
-- Identifies best performers for:
-  - Highest Accuracy
-  - Highest F-Measure
-  - Highest ROC Area
-  - Fastest Training
-  - Fastest Evaluation
+- Displays: Accuracy, Precision, Recall, F-Measure, Kappa, ROC Area, Training Time, Evaluation Time
+- Identifies best performers in each category
 
-#### 3. **Experimental Remarks**
+#### 2. **Experimental Analysis & Remarks**
 
-- Overall best model recommendation
-- Runtime performance analysis
+- Overall best model recommendation based on balanced performance
+- Runtime performance analysis with averages
 - Ensemble vs Base classifier comparison
-- Statistical insights (averages, above/below average)
+- Statistical insights (above/below average performers)
 
-#### 4. **Export Results**
+#### 3. **CSV Export**
 
-- Saves all metrics to CSV file (`evaluation_results.csv`)
-- Suitable for further analysis or reporting
+- Saves all metrics to `evaluation_results.csv`
+- Ready for further analysis, visualization, or reporting
+
+### How It Works
+
+Step 4 does **NOT re-evaluate models**. Instead:
+
+1. **During Steps 2 & 3:** Evaluation results and timing are captured when models are trained
+2. **Step 4:** Uses the captured `ModelResult` objects to generate comparison reports
+3. **Result:** Instant report generation without additional computation
 
 ### Usage Example
 
 ```java
+// During Steps 2 and 3, capture evaluation results with timing
 List<ModelResult> allResults = new ArrayList<>();
 
-// Evaluate base classifiers
-WekaClassifier j48 = new WekaClassifier("J48");
-ModelResult j48Result = ModelEvaluators.evaluateClassifier(
-    j48.getClassifier(), data, "J48");
-allResults.add(j48Result);
+// Step 2: Train and evaluate base classifiers
+for (String classifierType : classifierTypes) {
+    WekaClassifier classifier = new WekaClassifier(classifierType);
+    classifier.loadData(filePath);
 
-// Evaluate ensemble methods
-ImprovedClassifiers bagging = new ImprovedClassifiers("J48");
-ModelResult baggingResult = ModelEvaluators.evaluateClassifier(
-    bagging.getEnsembleClassifier(), data, "BAGGING (J48)");
-allResults.add(baggingResult);
+    // Measure training time
+    long trainStart = System.nanoTime();
+    classifier.trainClassifier();
+    long trainEnd = System.nanoTime();
+    double trainTime = (trainEnd - trainStart) / 1_000_000_000.0;
 
-// Generate comprehensive reports
+    // Measure evaluation time
+    long evalStart = System.nanoTime();
+    Evaluation eval = classifier.evaluateModel();
+    long evalEnd = System.nanoTime();
+    double evalTime = (evalEnd - evalStart) / 1_000_000_000.0;
+
+    // Store result
+    allResults.add(new ModelResult(classifierType, eval, trainTime, evalTime));
+}
+
+// Step 3: Train and evaluate Bagging ensembles (similar timing capture)
+
+// Step 4: Generate comparison reports using captured results
 ModelEvaluators.compareModels(allResults);
 ModelEvaluators.generateAnalysisReport(allResults);
 ModelEvaluators.saveResultsToCSV(allResults, "evaluation_results.csv");
@@ -279,17 +285,41 @@ MODEL COMPARISON REPORT
 
 Model                | Accuracy   | Precision  | Recall     | F-Measure  | Kappa      | ROC Area   | Train(s)   | Eval(s)
 ------------------------------------------------------------------------------------------------------------------------------------
-J48                  |     62.44% |     0.6235 |     0.6244 |     0.6239 |     0.2312 |     0.6213 |       1.46 |      12.44
-NaiveBayes           |     62.94% |     0.6250 |     0.6294 |     0.6089 |     0.2054 |     0.6552 |       0.05 |       0.49
-BAGGING (J48)        |     69.24% |     0.6897 |     0.6924 |     0.6889 |     0.3618 |     0.7339 |      12.83 |     109.82
-BAGGING (NaiveBayes) |     62.79% |     0.6232 |     0.6279 |     0.6072 |     0.2021 |     0.6551 |       0.33 |       3.55
+J48                  |     77.78% |     0.6853 |     0.7778 |     0.7136 |     0.0070 |     0.5122 |       0.91 |       4.25
+NaiveBayes           |     80.00% |     NaN    |     0.8000 |     NaN    |     0.0000 |     0.4931 |       0.07 |       0.44
+BAGGING (J48)        |     79.12% |     0.6868 |     0.7912 |     0.7134 |     0.0050 |     0.5014 |       4.29 |      35.24
+BAGGING (NaiveBayes) |     80.00% |     NaN    |     0.8000 |     NaN    |     0.0000 |     0.4967 |       0.23 |       2.36
 
 === BEST PERFORMERS ===
-Highest Accuracy:     BAGGING (J48) (69.2357%)
-Highest F-Measure:    BAGGING (J48) (0.6889)
-Highest ROC Area:     BAGGING (J48) (0.7339)
-Fastest Training:     NaiveBayes (0.051s)
-Fastest Evaluation:   NaiveBayes (0.487s)
+Highest Accuracy:     NaiveBayes (80.00%)
+Highest F-Measure:    J48 (0.7136)
+Highest ROC Area:     J48 (0.5122)
+Fastest Training:     NaiveBayes (0.07s)
+Fastest Evaluation:   NaiveBayes (0.44s)
+
+====================================================================================================
+EXPERIMENTAL RESULTS ANALYSIS & REMARKS
+====================================================================================================
+
+=== OVERALL BEST MODEL ===
+Model: BAGGING (J48)
+Reasoning: Balanced performance across accuracy, F-Measure, and ROC Area
+
+=== KEY OBSERVATIONS ===
+
+1. Accuracy Analysis:
+   - Average Accuracy: 79.2250%
+   - BAGGING (J48) performs close to average
+
+2. Runtime Performance:
+   - Average Training Time: 1.38s
+   - NaiveBayes trains faster than average (0.07s)
+   - BAGGING (NaiveBayes) trains faster than average (0.23s)
+
+3. Ensemble Methods vs Base Classifiers:
+   - Base Classifiers Average Accuracy: 78.89%
+   - Ensemble Methods Average Accuracy: 79.56%
+   - Ensemble Improvement: +0.67%
 ```
 
 ### Key Insights from Step 4
@@ -302,14 +332,15 @@ Fastest Evaluation:   NaiveBayes (0.487s)
 
 2. **Ensemble Improvement:**
 
-   - Bagging (J48) achieves **+6.8% accuracy** over base J48
+   - Bagging ensemble typically achieves higher accuracy over base classifiers
    - Improved F-Measure and ROC Area demonstrate better classification
    - Bagging reduces overfitting through model averaging
 
-3. **Recommendations:**
-   - **Production Use:** BAGGING (J48) - Best accuracy and performance
-   - **Real-Time Applications:** NaiveBayes - Fastest total time (0.538s)
-   - **Demo Constraints:** Simplified to 2 base + 2 Bagging models (~3 min runtime)
+3. **Important Notes:**
+   - **No Re-evaluation:** Step 4 uses results captured during Steps 2 & 3
+   - **Efficient Reporting:** Comparison report generated instantly without re-running models
+   - **Runtime Tracking:** Training and evaluation times measured during initial model runs
+   - **Demo Friendly:** Simplified to 2 base + 2 Bagging models for quick execution
 
 ---
 
@@ -323,45 +354,49 @@ public static void main(String[] args) throws Exception {
     data = DataProcessing.BasicPreprocessing(data);
     data = DataProcessing.OversamplingData(data);
 
-    // Step 2: Baseline Classification
+    String filePath = "datasets/heart_disease.arff";
     String[] classifierTypes = {"J48", "NaiveBayes"};
+    String[] baggingBaseClassifiers = {"J48", "NaiveBayes"};
+
+    // Store results for Step 4 comparison
+    List<ModelResult> allResults = new ArrayList<>();
+
+    // Step 2: Train and evaluate base classifiers
     for (String type : classifierTypes) {
         WekaClassifier classifier = new WekaClassifier(type);
-        classifier.loadData(data);
+        classifier.loadData(filePath);
+
+        long trainStart = System.nanoTime();
         classifier.trainClassifier();
-        classifier.evaluateModel();
+        double trainTime = (System.nanoTime() - trainStart) / 1_000_000_000.0;
+
+        long evalStart = System.nanoTime();
+        Evaluation eval = classifier.evaluateModel();
+        double evalTime = (System.nanoTime() - evalStart) / 1_000_000_000.0;
+
+        allResults.add(new ModelResult(type, eval, trainTime, evalTime));
         classifier.saveModel("models/" + type + "_model.model");
     }
 
-    // Step 3: Improved Classification with Bagging
-    String[] baggingBaseClassifiers = {"J48", "NaiveBayes"};
+    // Step 3: Train and evaluate Bagging ensembles
     for (String baseType : baggingBaseClassifiers) {
         ImprovedClassifiers bagging = new ImprovedClassifiers(baseType);
-        bagging.loadData(data);
+        bagging.loadData(filePath);
+
+        long trainStart = System.nanoTime();
         bagging.trainClassifier();
-        bagging.evaluateModel();
+        double trainTime = (System.nanoTime() - trainStart) / 1_000_000_000.0;
+
+        long evalStart = System.nanoTime();
+        Evaluation eval = bagging.evaluateModel();
+        double evalTime = (System.nanoTime() - evalStart) / 1_000_000_000.0;
+
+        String modelName = "BAGGING (" + baseType + ")";
+        allResults.add(new ModelResult(modelName, eval, trainTime, evalTime));
         bagging.saveModel("models/Bagging_" + baseType + "_model.model");
     }
 
-    // Step 4: Comprehensive Evaluation and Comparison
-    List<ModelResult> allResults = new ArrayList<>();
-
-    // Evaluate all models
-    for (String type : classifierTypes) {
-        WekaClassifier classifier = new WekaClassifier(type);
-        ModelResult result = ModelEvaluators.evaluateClassifier(
-            classifier.getClassifier(), data, type);
-        allResults.add(result);
-    }
-
-    for (String baseType : baggingBaseClassifiers) {
-        ImprovedClassifiers bagging = new ImprovedClassifiers(baseType);
-        ModelResult result = ModelEvaluators.evaluateClassifier(
-            bagging.getEnsembleClassifier(), data, "BAGGING (" + baseType + ")");
-        allResults.add(result);
-    }
-
-    // Generate reports
+    // Step 4: Generate comparison reports (no re-evaluation)
     ModelEvaluators.compareModels(allResults);
     ModelEvaluators.generateAnalysisReport(allResults);
     ModelEvaluators.saveResultsToCSV(allResults, "evaluation_results.csv");
