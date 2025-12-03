@@ -14,6 +14,8 @@ import weka.filters.*;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.InterquartileRange;
 import weka.filters.unsupervised.instance.RemoveDuplicates;
+import weka.filters.unsupervised.attribute.Discretize;
+import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.instance.Resample;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 import weka.filters.supervised.attribute.NominalToBinary;
@@ -92,15 +94,16 @@ public class DataProcessing {
         Filter filter = new ReplaceMissingValues();
         filter.setInputFormat(data);
         data = Filter.useFilter(data, filter);
-        for (int i = 0; i < data.numAttributes(); i++) {
-            System.out.println("==========-Count Missing Value After Processing-==========");
-            AttributeStats stats = data.attributeStats(i);
-            System.out.println("Missing data for " + data.attribute(i).name() + ": " + stats.missingCount);
-            System.out.println("=================-----------------------=================");
-        }
+//        for (int i = 0; i < data.numAttributes(); i++) {
+//            System.out.println("==========-Count Missing Value After Processing-==========");
+//            AttributeStats stats = data.attributeStats(i);
+//            System.out.println("Missing data for " + data.attribute(i).name() + ": " + stats.missingCount);
+//            System.out.println("=================-----------------------=================");
+//        }
         filter = new RemoveDuplicates();
         filter.setInputFormat(data);
         data = Filter.useFilter(data, filter);
+
         InterquartileRange ifilter = new InterquartileRange();
         ifilter.setInputFormat(data);
         ifilter.setAttributeIndices("first-last");
@@ -121,6 +124,23 @@ public class DataProcessing {
         }
         System.out.println("                Outliers Count: " + outlierCount);
         System.out.println("                Extremes Count: " + extremeCount);
+        data.deleteAttributeAt(data.numAttributes() - 1);
+        data.deleteAttributeAt(data.numAttributes() - 1);
+
+
+        filter = new Normalize();
+        filter.setInputFormat(data);
+        data = Filter.useFilter(data, filter);
+        filter = new Discretize();
+        filter.setInputFormat(data);
+        data = Filter.useFilter(data, filter);
+        filter = new NominalToBinary();
+        for (int i = 0; i < data.numAttributes(); i++) {
+            System.out.println("Missing data for " + data.attribute(i).name());
+        }
+        filter.setInputFormat(data);
+        data = Filter.useFilter(data, filter);
+
 
         System.out.println("Total Attr after filtering: " + data.numInstances());
         return data;
@@ -166,24 +186,24 @@ public class DataProcessing {
     public static Instances OversamplingData(Instances data) throws Exception {
         SMOTE filter = new SMOTE();
         filter.setInputFormat(data);
-        filter.setPercentage(200);
-        filter.setNearestNeighbors(8);
+        filter.setPercentage(300);
+        filter.setNearestNeighbors(2);
         data = Filter.useFilter(data, filter);
-        for (int i = 0; i < data.numAttributes(); i++) {
-            if (data.attribute(i).isNominal()) {
-                int numVals = data.attribute(i).numValues();
-                double[] counts = new double[numVals];
-                for (int j = 0; j < data.numInstances(); j++) {
-                    int valIndex = (int) data.instance(j).value(i);
-                    counts[valIndex]++;
-                }
-                System.out.println("Values Count for " + data.attribute(i).name() + ": ");
-                for (int a = 0; a < counts.length; a++) {
-                    System.out.println(data.attribute(i).value(a) + ":  " + counts[a]);
-                }
-                System.out.println("============----------------=========== ");
-            }
-        }
+//        for (int i = 0; i < data.numAttributes(); i++) {
+//            if (data.attribute(i).isNominal()) {
+//                int numVals = data.attribute(i).numValues();
+//                double[] counts = new double[numVals];
+//                for (int j = 0; j < data.numInstances(); j++) {
+//                    int valIndex = (int) data.instance(j).value(i);
+//                    counts[valIndex]++;
+//                }
+//                System.out.println("Values Count for " + data.attribute(i).name() + ": ");
+//                for (int a = 0; a < counts.length; a++) {
+//                    System.out.println(data.attribute(i).value(a) + ":  " + counts[a]);
+//                }
+//                System.out.println("============----------------=========== ");
+//            }
+//        }
         return data;
     }
 

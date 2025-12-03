@@ -1,5 +1,6 @@
 package org.classpj.Models;
 
+import org.classpj.Processors.DataProcessing;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
@@ -78,6 +79,10 @@ public class WekaClassifier {
             if (trainData.classIndex() == -1) {
                 trainData.setClassIndex(trainData.numAttributes() - 1);
             }
+            trainData.deleteAttributeAt(12);
+//            trainData = DataProcessing.BasicPreprocessing(trainData);
+//            trainData = DataProcessing.OversamplingData(trainData);
+
 
             System.out.println("Data loaded successfully!");
             System.out.println("Number of instances: " + trainData.numInstances());
